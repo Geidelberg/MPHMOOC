@@ -18,7 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Producing plots in R
 
-1. Kidney graph: histogram with x=0 to 4, huge peak at 2 and v few people with other values
+### 1. Kidney graph: histogram with x=0 to 4, huge peak at 2 and v few people with other values
+
+#### Note: I've represented this as a barchart, interpreting it as a discrete var - can change if you like!
 
 ```{r, Q1, echo=show_solutions, eval=run_chunks}
 
@@ -30,7 +32,7 @@ barplot(table(kidney_df), ylab = "Frequency", xlab = "Number of kidneys", main =
 ```
 
 
-1b (Alternative). Using ggplot2
+### 1b (Alternative). Using ggplot2
 
 ```{r, Q1b, echo=show_solutions, eval=run_chunks, warning=FALSE}
 
@@ -50,10 +52,51 @@ ggplot(kidney_df) + geom_histogram(aes(x = no_kidneys), bins = 4, fill = "darkre
 ```
 
 
-2 Height graph
+### 2 Height graph
 
-```{r, Q1b, echo=show_solutions, eval=run_chunks, warning=FALSE}
+```{r, Q2, echo=show_solutions, eval=run_chunks, warning=FALSE}
 
+
+hist(c(1.2, 2, rnorm(n = 10000, mean = 1.6, sd = 0.1)), nclass = 40, ylab = "", xlab = "Height in cm", main = "Distribution of adult height in cm", axes = F)
+axis(side = 1,  at=seq(1.2 , 2, 0.1), labels = seq(1.2 , 2, 0.1))
+
+```
+
+
+### 3 Normal with large SD
+
+
+
+```{r, Q3, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+hist(c(0, 100, rnorm(n = 100000, mean = 50, sd = 12)), nclass = 101, ylab = "Frequency", xlab = "", main = "", axes = F)
+axis(side = 1,  at=seq(0 , 100, 20), labels = seq(0 , 100, 20))
+
+
+```
+
+
+
+### 4 Normal with small SD
+
+
+
+```{r, Q4, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+hist(c(0, 101, rnorm(n = 100000, mean = 50, sd = 4)), nclass = 101, ylab = "Frequency", xlab = "", main = "", axes = F)
+axis(side = 1,  at=seq(0 , 100, 20), labels = seq(0 , 100, 20))
+
+
+
+```
+
+### 5 Poisson, mean at 4
+
+
+
+```{r, Q5, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+barplot(table(rpois(n = 100000, lambda = 4)), axes = F, ylab = "Number of patients in an hour")
 
 
 ```
