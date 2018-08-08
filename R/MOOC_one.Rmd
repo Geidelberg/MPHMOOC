@@ -1,0 +1,16 @@
+---
+title: 'MOOC 1: Shall we give this a title?'
+output:
+word_document: default
+pdf_document: default
+date: "07 August 2018"
+subtitle: Introduction to Statistical Thinking and Defining a Research Question
+---
+```{r chunk_options, echo=FALSE}
+show_solutions <- T
+run_chunks <- T
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```

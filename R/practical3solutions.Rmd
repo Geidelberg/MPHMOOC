@@ -1,0 +1,285 @@
+---
+title: 'Week 3: Parameter Estimation, Confidence Intervals and Significance Tests'
+output:
+word_document: default
+pdf_document: default
+date: "07 August 2018"
+subtitle: Introduction to Statistical Thinking and Data Analysis
+---
+```{r chunk_options, echo=FALSE}
+show_solutions <- T
+run_chunks <- T
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=F, eval=run_chunks}
+week3dir <- "Q:/MPHMOOC"
+setwd(week3dir)
+babiesFile <- "babies.csv"
+chlorineFile <- "chlorine.csv"
+bmiFile <- "bmi.csv"
+babies <- read.csv(babiesFile)
+chlorine <- read.csv(chlorineFile)
+bmi <- read.csv(bmiFile)
+```
+
+## A. Descriptive analysis of birth weight and maternal smoking
+Background: One of the U.S. Surgeon General’s health warnings placed on the side panel of cigarette packages reads:
+
+**Smoking by pregnant women may result in fetal injury, premature birth, and low birth weight**
+
+In this exercise, you will be analysing a subset of data from the U.S. Child Health and Development Studies (CHDS) – a comprehensive investigation of all pregnancies that occurred between 1960 and 1967 among women in San Francisco – to compare birth weights of babies born to smoking and non-smoking mothers, in order to determine whether they corroborate the Surgeon General’s warning. 
+
+The csv file ‘babies.csv’ contain information relating to 1202 babies born during one year of the study, who lived at least 28 days and who were single births (i.e. not one of a twin or higher order multiple birth). You have already used this data in last week’s R practical.
+
+The variables available to you for analysis are as follows:
+
+| Variable Name | Description                           |
+| ------------- | ------------------------------------- |
+| wt            | Total number of previous pregnancies including foetal deaths and still births 0=none, 1=1, 2=2, 3=3 or more |
+| age           | Mother's age at conception, in years |
+| ed            | Mother’s education 1=low (did not graduate from high school), 2=medium (high school graduate), 3=high (further training/education after high school) |
+| ht            | Mother's height, in inches |
+| smoke         | Smoking status of mother during pregnancy 0=no, 1=yes |
+
+Before you start, create a new sub-directory in your H: drive to store the data and your .R and .csv files for this practical session, or choose which of your directories you want to use (note that you can do this from R using `dir.create()`. Try typing `?dir.create`). Then download the babies.csv file from Blackboard and save it in this directory. Set this directory to be your working directory in R (you can use the dropdown menu in `Session` or use the `setwd()` command in R).
+
+1. Using R, numerically summarise the distributions of birth weight for babies born to (i) smokers and (ii) non-smokers, by finding the mean, median, SD, range and inter-quartile range of birth weight for each group.
+```{r, QA1, echo=show_solutions, eval=run_chunks}
+# 1. summaries of weights of babies from smokers/non-smokers
+# creating separate data frames
+smokers <- babies[babies$smoke=="Yes",]
+nonsmokers <- babies[babies$smoke=="No",]
+
+# Produces summary statistics
+summary(smokers$wt)
+summary(nonsmokers$wt)
+
+# Standard deviations
+sd(smokers$wt)
+sd(nonsmokers$wt)
+```
+
+2. Use R to plot separate histograms of the distributions of birth weight for babies born to smokers and to non-smokers.
+```{r, QA2, echo=show_solutions, eval=run_chunks}
+# 2. plotting histograms for birth weight by smoking
+hist(smokers$wt,main="Birth weight distribution for smokers")
+hist(nonsmokers$wt,main="Birth weight distribution for non-smokers")
+```
+
+3. Comment on whether there appear to be any differences in the birth weight distribution of babies born to smoking versus non-smoking mothers.
+
+\textcolor{red}{There is a lot of overlap between the distributions, but the distribution of birth weights for smoking mothers is shifted slightly to the left compared to non-smoking mothers, suggesting that they tend to have slightly lighter babies.}
+
+4. Calculate the difference in mean birth weight for smoking and non-smoking mothers. Do you think this is an important difference? Justify your answer. (You might find it helpful to consider the size of the SD of birth weight in the two groups when thinking about this, and to note that a foetus typically gains about 250g in weight per week during the last 6-8 weeks of pregnancy). 
+
+\textcolor{red}{From your answer to question 1 above, you should have found that mean birth weight of babies born to non-smoking mothers is 3490 grams (SD = 494 grams) and for smoking mothers it is 3230 grams (SD = 514 grams).} 
+
+\textcolor{red}{So babies born to non-smoking mothers are, on average, 260 (3490-3230) grams heavier than babies born to smoking mothers. Biologically, this difference is equivalent to about one week’s growth in the womb (babies gain about 250 grams per week on average during the last 6-8 weeks of a pregnancy), so the difference seems important biologically. Statistically, there is a question of whether the difference is simply caused by chance based on the sample of babies selected in our study, or whether other samples of babies born to smoking and non-smoking mothers would give a similar pattern. 260 grams is equivalent to just over 0.5 standard deviations of the birth weight distributions of both smokers and non-smokers in the CHDS sample (SD of birth weight in each group was about 500 grams).}
+
+```{r, QA4, echo=show_solutions, eval=run_chunks}
+summary(smokers$wt)
+summary(nonsmokers$wt)
+
+# difference in mean birth weight. Notice that you can used named indexing on vectors too!
+summary(nonsmokers$wt)["Mean"] - summary(smokers$wt)["Mean"]
+```
+
+5. Now we want you to calculate confidence intervals on birth weight in this population.
+    a. What is the point estimate of the mean birth weight of new born babies in the population (use the `mean()` function)?
+    ```{r, QA5, echo=show_solutions, eval=run_chunks}
+    mean(babies$wt)
+    ```
+    b. Calculate a 95% confidence interval for this population mean. You should calculate this confidence interval ‘by hand’ using one of the formulas given in the lecture notes for calculating a confidence interval for a mean.
+
+    \color{red}Recall the formula for a 100(1-$\alpha$)% confidence interval for the mean based on large samples: $(\bar{x} - z_{\alpha}\times SE, \bar{x} + z_{\alpha}\times SE)$
+        
+    where $z_{\alpha}$= critical value of a standard normal distribution that gives 100x($\alpha$/2)% of the distribution in either tail, and SE = standard error of the mean = $SD/\sqrt{n}$.
+       
+    So, we need the following pieces of information to calculate the confidence interval:  $\bar{x} = 3386.3g$; $\alpha= 517.8g$; $n = 1202$; so $SE = 517.8 /\sqrt{1202} = 14.9g$
+        
+    For 95% interval, we set $\alpha=0.05$, so $z_{\alpha} = 1.96$ (or you can use number 2 here, also fine)
+        
+    So our 95% CI is (3386.3 – 1.96×14.9, 3386.3 – 1.96×14.9), i.e. (3357.1g, 3415.5g)
+    \color{black}
+    
+    c. Calculate a 99% confidence interval for this population mean. (Hint: just change the value of z in the formula for the confidence interval to be the critical value of a standard normal distribution that gives 0.5% of the distribution in either tail – which is 2.58).
+    
+    \color{red}For 99% interval, we set $\alpha$=0.01, so $z_{\alpha/2} = 2.58$
+    So our 99% CI is (3386.3 – 2.58×14.9, 3386.3 – 2.58×14.9), i.e. (3347.9g, 3424.7g)
+    \color{black}
+    
+    
+    d. Complete the following sentences:
+        + Our best estimate of the mean birth weight of new born babies in the population is \textcolor{red}{3386.3g}.
+        + We are 95% confident that population mean birth weight is between \textcolor{red}{3357.1g} and \textcolor{red}{3415.5g}. We are 99% confident that population mean birth weight is between \textcolor{red}{3347.9g} and \textcolor{red}{3424.7g}. 
+          \textcolor{red}{(Make sure that the units of measurement (grams) are reported along with the estimates and confidence limits)}
+6. Check your answers to question 5 above by using the `t.test()` function in R to compute a point estimate and 95% and 99% confidence intervals for population mean birth weight. You will need to set the `conf.level` argument. You may get some slight differences compared to your original answer due to rounding errors.
+```{r, QA6, echo=show_solutions, eval=run_chunks}
+t.test(babies$wt, conf.level = 0.95)
+t.test(babies$wt, conf.level = 0.99)
+```
+
+7. Now use the CHDS birth weight data to calculate a point estimate of the difference in mean birth weights between babies born to non-smokers and smokers. 
+    a. Calculate a 95% confidence interval for this difference. You should use the `t.test()` command in R to do this. To use the `t.test()` function to assess the difference between two variables, you will need to use the `~` (tilde) operator to indicate a relationship between two variables. You should also set the `var.equal` argument to TRUE to incorporate the assumption that both variables have equal variance.
+    ```{r, QA7a, echo=show_solutions, eval=run_chunks}
+    t.test(babies$wt ~ babies$smoke, var.equal = T)
+```    
+       Complete the following sentence: We estimate that the population mean birth weight of babies born to smoking mothers is \textcolor{red}{260.1g} lower than the mean birth weight of babies born to non-smoking mothers. We are 95% confident that the population difference in mean birth weights between babies born to non-smokers and to smokers is between \textcolor{red}{201.8g} and \textcolor{red}{318.3g}. In other words, we are 95% confident that babies born to mothers who don’t smoke are between \textcolor{red}{201.8g} and \textcolor{red}{318.3g} \textcolor{red}{heavier} *on average* than babies born to mothers who smoke.
+       
+    b. Now interpret the associated significance test. Firstly, write down the null and alternative hypotheses that are being tested.
+    
+    \color{red}H0: In the population, the mean birth weight of babies whose mothers smoke during pregnancy is the same as the mean birth weight of babies whose mothers do not smoke (i.e. the difference in mean birth weights is zero).
+    
+    H1: In the population, the mean birth weight of babies whose mothers smoke during pregnancy is not the same as the mean birth weight of babies whose mothers do not smoke (i.e. the difference in mean birth weights is not equal to zero).
+    
+    Test statistic, t statistic = 8.76, df = 1200, p-value = 0.0000, (i.e. 0.0000 to 4 decimal places, so p<0.00005, or often quoted as p<0.0001).
+    
+    The p-value is <0.00005, suggesting very strong evidence to reject the null hypothesis. Since the observed mean birth weight in smoking mothers is lower than in non-smoking mothers, we conclude that mothers who smoke during pregnancy have significantly lighter babies, on population average, than mothers who don’t smoke.\color{black}
+    
+8. Now test whether or not mothers with low education deliver babies whose population mean birth weight is lower than 3410g. The population mean birth weight is 3410g according to WHO growth charts. Write down the appropriate null and alternative hypotheses, and carry out a suitable significance test. Hint: use the `mu` argument to set the true mean to a constant.
+
+\color{red}H0: The mean birth weight of babies in the population who are born to low educated mothers is 3410g
+
+H1: The mean birth weight of babies in the population who are born to low educated mothers is not 3410g\color{black}
+
+```{r, QA8a, echo=show_solutions, eval=run_chunks}
+t.test(babies[babies$ed=="Low","wt"],mu=3410)
+```
+
+\color{red}Test statistic, y = -2.84, df = 195, p-value = 0.005.
+
+The p-value is smaller than 0.01 suggesting strong evidence to reject the null hypothesis. Therefore we conclude that mean birth weight of babies born to low educated mothers is statistically significantly less than in the reference population.
+\color{black}
+
+## B. Comparison of Paired Data
+Chlorine is routinely added to the domestic tap water supply in the UK as part of the disinfection process. However, this leads to low levels of disinfection by-products in the water that may be harmful to foetal development. A study looked at the incidence rate of low birth weight per 100 live births in 16 districts of England before and after the Water Supply Company implemented a new water treatment process to reduce levels of disinfection by-products in the tap water supply. Rountine measurement of tap water samples confirmed that concentrations of the main by-product (total trihalomethanes) dropped by between 5 and 65 $\mu$g/L per district following the new treatment process.
+
+The incidence rate of low birth weight per 100 live births for each district are in the file "chlorine.csv", which you should load into R in order to answer the questions below.
+
+Before proceeding to the questions, take a moment to think about what type of measurements we have here. What are the sampling units for this study – individuals or districts? Are the observations discrete or continuous? Are we analysing means or proportions?  Our sample is actually a sample of districts, and for each district we have two measurements of a continuous numeric variable (the incidence rate of low birth weight babies per 100 live births). If the sampling units had been individual babies then we would have been dealing with a binary outcome variable (low birth weight or normal birth weight for each baby). 
+
+Questions:
+
+1. Calculate the mean and SD of the incidence rate of low birth weight in a district *before* the new water treatment process (variable `chlorine$before`). 
+```{r, QB1, echo=show_solutions, eval=run_chunks}
+summary(chlorine$before)
+sd(chlorine$before)
+```
+
+2. Calculate the mean and SD of the incidence rate of low birth weight in a district *after* the new water treatment process (variable `chlorine$after`).
+```{r, QB2, echo=show_solutions, eval=run_chunks}
+summary(chlorine$after)
+sd(chlorine$after)
+```
+
+3. See how your answers to (1) and (2) relate to the R `t.test()` command below. This provides an estimate and 95% confidence interval for the difference in mean incidence rate of low birth weight in a district after the new water treatment process was introduced compared with before. Do your results appear to provide any evidence of an effect of the new water treatment process on incidence rate of low birth weight? Assume equal variance.
+```{r, QB3, echo=show_solutions, eval=run_chunks}
+t.test(chlorine$after, chlorine$before, var.equal = T)
+```
+\color{red}Point estimate of difference: 7.31 – 7.81 = -0.5, i.e. reduction in mean rate of 0.5 per 100 live births
+95% CI for difference in mean rates is -1.51 to 0.51 per 100 live births. This CI includes the null value of no difference, so we cannot be confident about whether there was an increase or a decrease in the mean incidence rate of low birth weight following the treatment change. Thus there is no strong evidence to suggest that the reduction in trihalomethane levels due to the new treatment process had any significant effect on rate of low birth weight in the districts.
+
+However, it is also true that the above analysis is inappropriate since it has not taken account of the paired nature of the data. So we should not really be reporting the above result.\color{black}
+
+4. In R, create a new column in the chlorine data frame that represents the change (after – before) in incidence rate of low birth weight for each district (you can do this using `chlorine$change <- chlorine$after - chlorine$before`). What proportion of districts showed a reduction in incidence rate of low birth weight after the new water treatment process was introduced? *Hint: you will need to use logical subsetting to find those rows with negative and positive changes. Think how to use the `ifelse()` function with the `sum()` function (which sums all elements of a vector)*
+```{r, QB4, echo=show_solutions, eval=run_chunks}
+chlorine$change <- chlorine$after - chlorine$before 
+
+counts <- ifelse(chlorine$change < 0, 1, 0)
+print(sum(counts)/nrow(chlorine))
+```
+\color{red}11 out of 16 districts (69%) had a reduction in rate of low birth weight after the new water treatment process was introduced.\color{black}
+
+
+5. Calculate an estimate of the mean change in rate of low birth weight in a district after the new water treatment process was introduced, and calculate a 95% confidence interval for this estimate (use the `t.test()` command in R). What do you now conclude about the effect of the new water treatment process on incidence rate of low birth weight? This command also performs a one sample t-test of the mean changes, comparing them to a mean change of zero (the default value for `mu`). Interpret your results
+
+```{r, QB5, echo=show_solutions, eval=run_chunks}
+t.test(chlorine$change)
+```
+
+\color{red}So mean change in incidence rate of low birth weight is -0.5 per 100 live births, with 95% CI for the mean change of (-0.93 to -0.07). This CI excludes the null value of no difference, and suggests that there is some evidence that the reduction in trihalomethane levels due to the new treatment process was associated with a significant reduction in a district’s rate of low birth weight. On average, districts had 5 fewer low birth weight babies per 1000 live births after the new treatment, and we are 95% confident that the mean reduction in rate of low birth weight after the new treatment is between 0.7 and 9.3 per 1000 live births. \color{black}
+
+\color{red}The two-sided p-value of 0.03 gives some relatively weak evidence to suggest that the population incidence of low birth weight babies is reduced on introduction of the new water treatment plants.\color{black}
+
+6. Using R, perform a paired samples t-test of the mean changes (use the `paired` argument). Interpret your results and compare to the results above.
+
+```{r, QB7, echo=show_solutions, eval=run_chunks}
+
+t.test(chlorine$before, chlorine$after, var.equal = T, paired = T)
+```
+
+\color{red}This is completely equivalent to performing the one sample t-test on changes, compared to the fixed value of zero.\color{black}
+
+7. Explain the different results/conclusions you obtained in (3) and (5)(6). Which estimate and CI, and p-value do you think is more appropriate? 
+
+\color{red}The results in (3) treat the two samples of low birth weight rates as independent – in other words, it is as if we had taken 2 different samples of 16 districts where 1 sample of 16 had the old water treatment process, and the other sample of 16 had the new treatment process. In (5) and (6) we recognise that each pair of before and after measurements are from the same district, and so we can calculate the difference. Both designs/assumptions give the same estimate of the mean difference in rate of low birth weight, but the 2 different assumptions have important implications for how we measure variability in our sample. Under the ‘independent samples’ analysis, we measure variability in the rates of low birth weight across our sample of 16 districts. Under the ‘paired samples’ analysis, we measure variability in the change in rate of low birth weight across our sample of 16 districts. Since change in rate of low birth weight will typically be much less variable than the rates of low birth weight themselves, the paired samples analysis provides a more precise estimate of the mean difference or change than does the independent samples analysis. Taking into account the paired nature of the data is therefore the appropriate analysis in this case.\color{black}
+
+8. The ‘before and after’ design of this study is an example of a **paired design** (each district is paired or compared with itself). What do you think are some of the advantages of this type of design, over a design in which, say, a sample of districts with low trihalomethane levels are compared with a different sample of districts with high trihalomethane levels?
+
+\color{red}We have already partly answered this question in 6 above. In the paired design, each sampling unit (in this case, each district) acts as its own ‘control’, and so factors that contribute to variability between sampling units but are not of direct interest to the scientific question can be better controlled for. For example, districts may vary in terms of deprivation/social class, rates of maternal smoking, pollution, ante-natal care etc. which may all lead to differences in rate of low birth weight. These factors are unlikely to change (much) between the before and after samples, but under the ‘independent samples’ assumption, we have no way of separating these sources of variation in low birth weight rates from the variation due to the water treatment process. However, under the ‘paired’ samples assumption, variation due to these ‘other’ factors tends to cancel out, since we are only interested in the change in rates of low birth weight within each district, and not in the low birth weight rate itself.\color{black}
+
+
+## C. Further questions on Statistical Hypothesis Tests
+1. The data in the table below are from a pilot study to test the feasibility of a proposed lifestyle intervention campaign to combat obesity in adults. The program is to be delivered through the workplace, and involves persuading individuals to walk or cycle to work at least twice a week instead of driving, and to make various changes to their lunchtime eating habits. Six obese volunteers participate in the study for 4 weeks. Their BMI is measured before and after the study.
+
+|  Subject  |  Pre-trial BMI  |  Post-trial BMI  |  Change in BMI  |
+|:----------|----------------:|-----------------:|----------------:|
+|     1     |       30.3      |        29.9      |      -0.4       |
+|     2     |       38.5      |        38.2      |      -0.3       |
+|     3     |       36.1      |        36.3      |       0.2       |
+|     4     |       31.9      |        31.5      |      -0.4       |
+|     5     |       35.4      |        35.4      |        0        |
+|     6     |       33.3      |        33.2      |      -0.1       |
+|   Mean    |       34.250    |        34.083    |      -0.167     |
+|    SD     |       2.99      |        3.116     |       0.242     |
+
+2. By mere inspection of the data, what do you conclude about the **clinical** significance of the difference in pre- and post-intervention BMI values?
+
+    \color{red}Most people reduced their BMI slightly following the intervention, which suggests some possible benefit of the intervention, but the changes are very small – the biggest reduction was only 0.4 points – which is not of great clinical significance. However, you might feel that, had the program continued for longer, then the changes in BMI might become more clinically meaningful.\color{black}
+
+    a. By mere inspection of the data, what do you conclude about the likely **statistical** significance of the difference in pre- and post-intervention BMI values?
+    
+    \color{red}It is very unlikely that such small changes in BMI in a small sample will produce a statistically significant result.\color{black}
+    
+    b. Load the BMI data frame into R using `bmi <- read.csv("bmi.csv")`. Then type in the following commands into R: `t.test(bmi$Change.in.BMI[1:6])`. Note that we address only the first 6 rows using the index `[1:6]`.
+        + State the null and alternative hypotheses that this test is testing.
+        + Calculate the SE and t statistic by hand from data in the above table (and agree to the table below). Calculate also the 95% CI’s, and agree to that in the output. To do this, note that the t value corresponding to a two sided p=0.05 level is 2.57, on 5 degrees of freedom.
+        
+    \color{red}Null hypothesis: In the population, there is no change in BMI on average following intervention program (i.e. mean change is zero)
+    
+    Alternative hypothesis: In the population, there is a change in BMI on average following intervention program (i.e mean change is not zero).
+    
+    This is a paired sample, since each subject is measured before and after the intervention, so we need to use a paired samples t-test. The paired samples t-test is actually equivalent to a single sample t-test on the mean change or difference between the before and after measurements.
+    
+    The mean change = -0.167, and sd of change = 0.242\color{black}
+
+```{r, QC3, echo=show_solutions, eval=run_chunks}
+t.test(bmi$Change.in.BMI[1:6])
+```
+\color{red}
+Test statistic, t value on 5 degrees of freedom = -1.69, corresponding p-value (2 sided) from tables of t distribution = 0.15
+P-value is > 0.05, so we cannot reject the null hypothesis. We conclude that there is no statistically significant change in BMI following the intervention program. \color{black}
+
+3. On the basis of this pilot study, would you recommend that the intervention campaign be abandoned or would you want to carry out further studies? Justify your answer. 
+
+\color{red}The pilot study provides no statistical evidence to show a benefit from the intervention program. However, with only 6 subjects and a relatively short time period over which the intervention was carried out, you might not expect to observe much change in BMI, even if the intervention was truly a successful one. Therefore, you may feel that the pilot study was too small, or not intervening for long enough in individual patients. The 95%CI contains values that might be considered clinically important. Therefore you might want to undertake another larger study, to determine more conclusively whether or not this intervention is helpful.\color{black}
+
+
+# Interpretation of t-test within R exercise from Practical 2 
+\color{red}The mean birth weight is 3488g in our sample of 733 babies born to mothers who do not smoke and is 3228g in our sample of 469 babies born to smoking mothers. This is a mean difference of 260g between the sample means, with lower mean birth weight in babies born to smoking mothers. Our best estimate of the difference in mean birth weight between these populations is 260g with an interval estimate of 202 to 318g. We are 95% confident that the true population difference in means is within this 95% CI, so is between 202 and 318g.
+
+Remember that the aim of the confidence intervals is to generalise beyond the specific babies included in our samples to the population from which, according to statistics theory we use to calculate confidence intervals, our babies were selected "at random".
+
+There is also a significance test here. 
+
+Ho = null hypothesis = mean birth weight in the population of babies born to smoking mothers is the same as the mean in those babies born to non-smoking mothers.
+
+Ha = alternative hypothesis = that the population means are different. 
+
+The p-value here is written as p=0.0000 (Note that we are looking at a two sided p-value, so Ha: diff != 0). We quote this as p<0.0001 (since p-value is never exactly zero). Since p<0.05, this result is statistically significant, so we reject the null hypothesis, and accept the alternative hypothesis. This gives strong evidence for a difference in mean birth weight between the population of babies born to smoking mothers and the population born to non-smoking mothers. We can conclude that we have very strong evidence that the population of babies born to smoking mothers is lower. 
+
+The graphs that you plotted in this practical show that taller mothers also have babies that are heavier on average, and so do babies born to mother's who have higher education. We could aim to adjust for a few variable simultaneously using a linear regression analysis.\color{black}

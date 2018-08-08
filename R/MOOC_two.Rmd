@@ -1,0 +1,60 @@
+---
+title: 'MOOC 2'
+output:
+word_document: default
+pdf_document: default
+date: "07 August 2018"
+subtitle: Distributions, sampling and variables
+---
+```{r chunk_options, echo=FALSE}
+show_solutions <- T
+run_chunks <- T
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Producing plots in R
+
+1. Kidney graph: histogram with x=0 to 4, huge peak at 2 and v few people with other values
+
+```{r, Q1, echo=show_solutions, eval=run_chunks}
+
+# Create kidney dataset
+kidney_df <- data.frame(patient = seq(1:1005), no_kidneys = c(1, 3, 3, 3, 4, rep(2, 1000)))
+
+barplot(table(kidney_df), ylab = "Frequency", xlab = "Number of kidneys", main = "Distribution of number of kidneys at birth")
+
+```
+
+
+1b (Alternative). Using ggplot2
+
+```{r, Q1b, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+# Create kidney dataset
+kidney_df <- data.frame(patient = seq(1:1005), no_kidneys = c(1, 3, 3, 3, 4, rep(2, 1000)))
+
+if (!require("ggplot2")) install.packages("ggplot2")
+require(ggplot2)
+
+
+ggplot(kidney_df) + geom_histogram(aes(x = no_kidneys), bins = 4, fill = "darkred") + theme_bw() +
+  labs(x = "Number of kidneys", y = "Frequency") + ggtitle("Distribution of number of kidneys at birth") + 
+  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 16))
+
+
+
+```
+
+
+2 Height graph
+
+```{r, Q1b, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+
+
+```
+
