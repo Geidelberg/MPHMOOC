@@ -1,6 +1,7 @@
 ---
 title: 'MOOC 2'
 output:
+mainfont: Times
 word_document: default
 pdf_document: default
 date: "07 August 2018"
@@ -15,6 +16,20 @@ run_chunks <- T
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
+```{r, Q0, echo=F, eval=T, show_solutions = F, message = F }
+
+# loading packages
+if (!require("ggplot2")) install.packages("ggplot2")
+require(ggplot2)
+
+if (!require("extrafont")) install.packages("extrafont")
+require(extrafont)
+loadfonts(device = "win")
+
+
+```
 
 ## Producing plots in R
 
@@ -39,13 +54,11 @@ barplot(table(kidney_df), ylab = "Frequency", xlab = "Number of kidneys", main =
 # Create kidney dataset
 kidney_df <- data.frame(patient = seq(1:1005), no_kidneys = c(1, 3, 3, 3, 4, rep(2, 1000)))
 
-if (!require("ggplot2")) install.packages("ggplot2")
-require(ggplot2)
 
 
-ggplot(kidney_df) + geom_histogram(aes(x = no_kidneys), bins = 4, fill = "darkred") + theme_bw() +
-  labs(x = "Number of kidneys", y = "Frequency") + ggtitle("Distribution of number of kidneys at birth") + 
-  theme(plot.title = element_text(hjust = 0.5), text = element_text(size = 16))
+
+ggplot(kidney_df) + geom_bar(aes(x = no_kidneys), bins = 4, fill = "#fbb4ae", colour = "black", size = 0.8, width = 0.8) + theme_bw() + labs(x = "Number of kidneys", y = "Frequency") + ggtitle("Distribution of number of kidneys at birth") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16,  family="Arial"),text = element_text(size = 16),  axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
 
 
 
@@ -101,3 +114,138 @@ barplot(table(rpois(n = 100000, lambda = 4)), axes = F, ylab = "Number of patien
 
 ```
 
+
+
+### 6 Fruit and veg consumption
+
+The World Health Survey didn't include the US:
+http://www.who.int/healthinfo/survey/countries/en/
+
+So I took a reference (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2396974/) from the paper you gave (https://www.sciencedirect.com/science/article/pii/S074937970900097X), detailing the average consumption of men and women who consume 5 or more fruit/veg a day, which is the same definition as used in the World Health Survey. In the paper you linked, they warn against comparing between studies, but I'm assuming it's ok for the purposes of these plots. Let me know if you would like me to use two countries in the same study. Let me know if you would like me to break it down by age as well (which would require more digging for the original data).
+
+Note: the Worth Health Survey paper do not give % of respondants who eat "Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7", like they do in the England study. From the Word document you provided, I'm guessing this was what you were looking for, as you were hoping to compare these distributions with the Normal/Poisson the students learnt previously. I can go digging for the data to see if they have % by portion of fruit/veg, if the following plots are not what you are looking for.
+
+US data
+From Blanck et al. 2008 (Table 2):
+Percentage of Men/Women Who Consume Fruits or Vegetables or Both Five or More Times per Day in 2002.
+
+Pakistan data
+From Hall et al. 2009 (Table 1):
+I flipped the question to be positive, i.e. % of people with adequate nutrition (hence 1 - 99%)
+
+
+```{r, Q6, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+
+US_nutrition <- data.frame(Country = "United States", Gender = c("Men", "Women"), Percent_5_a_day = c(20.2, 29.5))
+Pakistan_nutrition <- data.frame(Country = "Pakistan", Gender = c("Men", "Women"), Percent_5_a_day = c(100 - 99.2, 100 - 99.3))
+
+# US
+ggplot(US_nutrition) + geom_bar(aes(y = Percent_5_a_day, x = Gender, fill = Gender), stat = "identity", colour = "black") +
+  scale_fill_brewer(type = "qual") + theme_bw() + labs(y = "%") + ggtitle("Percent of citizens of US who consume at \n least 5 portions of fruit or vegetables a day")+
+  theme(strip.background = element_blank(), legend.position = "", plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black"))+
+  scale_y_continuous(limits = c(0, 70))
+
+# Pakistan
+ggplot(Pakistan_nutrition) + geom_bar(aes(y = Percent_5_a_day, x = Gender, fill = Gender), stat = "identity", colour = "black") +
+  scale_fill_brewer(type = "qual") + theme_bw() + labs(y = "%") + ggtitle("Percent of citizens of Pakistan who consume at \n least 5 portions of fruit or vegetables a day")+
+  theme(strip.background = element_blank(), legend.position = "", plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black")) +
+  scale_y_continuous(limits = c(0, 70))
+
+```
+
+
+
+
+Country with high consumption (Ghana)
+
+```{r, Q6c, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+Ghana_nutrition <- data.frame(Country = "Ghana", Gender = c("Men", "Women"), Percent_5_a_day = c(100 - 36.6, 100 - 38.0))
+
+ggplot(Ghana_nutrition) + geom_bar(aes(y = Percent_5_a_day, x = Gender, fill = Gender), stat = "identity", colour = "black") +
+  scale_fill_brewer(type = "qual") + theme_bw() + labs(y = "%") + ggtitle("Percent of citizens of Ghana who consume at \n least 5 portions of fruit or vegetables a day")+
+  theme(strip.background = element_blank(), legend.position = "", plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black")) +
+  scale_y_continuous(limits = c(0, 70))
+
+
+```
+
+
+
+
+Just in case you wanted side by side
+
+```{r, Q6b, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+
+Nutition_df <- rbind(US_nutrition, Pakistan_nutrition, Ghana_nutrition)
+
+ggplot(Nutition_df) + geom_bar(aes(y = Percent_5_a_day, x = Gender, fill = Gender), stat = "identity", colour = "black") +
+  scale_fill_brewer(type = "qual") +
+  facet_wrap(~Country) + theme_bw() + labs(y = "%") + ggtitle("Percent of people who consume at \n least 5 portions of fruit or vegetables a day")+
+  theme(strip.background = element_rect(fill = "white"), legend.position = "", plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black"))
+
+
+
+```
+
+Showing the US data by age:
+
+```{r, Q6.5b, echo=show_solutions, eval=run_chunks, warning=FALSE, fig.width = 12.5}
+
+
+US_nutrition_extra_men <- data.frame(Gender = rep("Men", 6), Age = c("18 - 24", "25 - 34", "35 - 44", "45 - 54", "55 - 64", "65 and over"),
+                                 Percent_5_a_day = c(20.5, 18, 18.1, 19, 20.4, 27.9))
+
+US_nutrition_extra_women <- data.frame(Gender = rep("Women", 6), Age = c("18 - 24", "25 - 34", "35 - 44", "45 - 54", "55 - 64", "65 and over"),
+                                     Percent_5_a_day = c(25, 24.7, 27.7, 29, 31.8, 38.1))
+US_nutrition_extra_df <- rbind(US_nutrition_extra_men, US_nutrition_extra_women)
+
+US_nutrition_extra_df$Age <- factor(US_nutrition_extra_df$Age, levels = c("18 - 24", "25 - 34", "35 - 44", "45 - 54", "55 - 64", "65 and over"))
+
+ggplot(US_nutrition_extra_df) + geom_bar(aes(y = Percent_5_a_day, x = Age, fill = Age), stat = "identity", colour = "black") +
+  scale_fill_brewer(type = "seq", palette = "Greens") +
+  facet_wrap(~Gender) + theme_bw() + labs(y = "%") + ggtitle("Percent of people who consume at least 5 portions of fruit or vegetables a day \n")+
+  theme(strip.background = element_rect(fill = "white"), legend.position = "", plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black"))
+
+
+
+```
+
+
+
+
+
+### 7 Health Survey For England
+
+Source:
+https://jech.bmj.com/content/68/9/856 (Table 1)
+
+```{r, Q7, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+
+
+
+fruit_veg_df <- data.frame(portions = c("Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7"),
+                          percent = c(15.2, 30.9, 29.0, 15.7, 9.3))
+
+fruit_veg_df$portions <- factor(fruit_veg_df$portions, levels = c("Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7"))
+
+ggplot(fruit_veg_df) + geom_bar(aes(x = portions, y = percent), stat =  "identity", fill = "#a6cee3", colour = "black", size = 0.8, width = 0.8) + theme_bw()+
+  labs(x = "\ Portions", y = "Percent of respondants (%)") + ggtitle("Portions of fruit and vegetables \n eaten on previous day in England") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black"))
+
+
+```
+
+### 8 Normal distribution mean of 26
+```{r, Q8, echo=show_solutions, eval=run_chunks, warning=FALSE}
+
+
+hist(c(10, 42, rnorm(n = 100000, mean = 26, sd = 2)), nclass = 101, ylab = "Frequency", xlab = "BMI", main = "", axes = F)
+axis(side = 1,  at=seq(10 , 42, 4), labels = seq(10 , 42, 4))
+
+
+
+```
