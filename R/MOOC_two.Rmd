@@ -1,11 +1,15 @@
 ---
-title: 'MOOC 2'
+pdf_document: default
+author: "Lily Geidelberg"
+date: "21 August 2018"
 output:
+  html_document: default
+  # pdf_document: default
+  # word_document: default
+title: "MOOC 2"
+subtitle: Distributions, sampling and variables
 mainfont: Times
 word_document: default
-pdf_document: default
-date: "07 August 2018"
-subtitle: Distributions, sampling and variables
 ---
 ```{r chunk_options, echo=FALSE}
 show_solutions <- T
@@ -37,32 +41,29 @@ loadfonts(device = "win")
 
 #### Note: I've represented this as a barchart, interpreting it as a discrete var - can change if you like!
 
+#### I've produced the graph in R's default base plot package, as well as a version in ggplot2. Let me know which you prefer.
+
 ```{r, Q1, echo=show_solutions, eval=run_chunks}
 
 # Create kidney dataset
 kidney_df <- data.frame(patient = seq(1:1005), no_kidneys = c(1, 3, 3, 3, 4, rep(2, 1000)))
 
-barplot(table(kidney_df), ylab = "Frequency", xlab = "Number of kidneys", main = "Distribution of number of kidneys at birth")
+barplot(table(kidney_df), ylab = "Frequency", xlab = "Number of kidneys", main = "Distribution of
+        number of kidneys at birth")
 
-```
+# alternative using ggplot2
 
-
-### 1b (Alternative). Using ggplot2
-
-```{r, Q1b, echo=show_solutions, eval=run_chunks, warning=FALSE}
-
-# Create kidney dataset
-kidney_df <- data.frame(patient = seq(1:1005), no_kidneys = c(1, 3, 3, 3, 4, rep(2, 1000)))
-
-
-
-
-ggplot(kidney_df) + geom_bar(aes(x = no_kidneys), bins = 4, fill = "#fbb4ae", colour = "black", size = 0.8, width = 0.8) + theme_bw() + labs(x = "Number of kidneys", y = "Frequency") + ggtitle("Distribution of number of kidneys at birth") +
-  theme(plot.title = element_text(hjust = 0.5, size = 16,  family="Arial"),text = element_text(size = 16),  axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
+ggplot(kidney_df) + geom_bar(aes(x = no_kidneys), bins = 4, fill = "#fbb4ae", colour = "black", size =
+                               0.8, width = 0.8) + theme_bw() +
+  labs(x = "Number of kidneys", y = "Frequency") + ggtitle("Distribution of number of kidneys at birth") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16,  family="Arial"),
+        text = element_text(size = 16),  axis.text.x = element_text(colour = "black"), 
+        axis.ticks.y = element_blank(), axis.text.y = element_blank())
 
 
 
 ```
+
 
 
 ### 2 Height graph
@@ -70,8 +71,17 @@ ggplot(kidney_df) + geom_bar(aes(x = no_kidneys), bins = 4, fill = "#fbb4ae", co
 ```{r, Q2, echo=show_solutions, eval=run_chunks, warning=FALSE}
 
 
-hist(c(1.2, 2, rnorm(n = 10000, mean = 1.6, sd = 0.1)), nclass = 40, ylab = "", xlab = "Height in cm", main = "Distribution of adult height in cm", axes = F)
+hist(c(1.2, 2, rnorm(n = 10000, mean = 1.6, sd = 0.1)), nclass = 40, ylab = "", xlab = "Height in metres", main = "Distribution of adult height in metres", axes = F)
 axis(side = 1,  at=seq(1.2 , 2, 0.1), labels = seq(1.2 , 2, 0.1))
+
+
+
+height_hist <- data.frame(Height = c(1.2, 2, rnorm(n = 10000, mean = 1.6, sd = 0.1)))
+ggplot(height_hist) + geom_histogram(aes(x = Height), fill = "#b3cde3", col = "black", bins = 80) + theme_bw()+ labs(x = "Height in metres") + ggtitle("Distribution of adult height in metres")+
+  theme(plot.title = element_text(hjust = 0.5, size = 16),text = element_text(size = 16),
+        axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
+
+
 
 ```
 
@@ -84,6 +94,13 @@ axis(side = 1,  at=seq(1.2 , 2, 0.1), labels = seq(1.2 , 2, 0.1))
 
 hist(c(0, 100, rnorm(n = 100000, mean = 50, sd = 12)), nclass = 101, ylab = "Frequency", xlab = "", main = "", axes = F)
 axis(side = 1,  at=seq(0 , 100, 20), labels = seq(0 , 100, 20))
+
+
+large_SD_hist <- data.frame(Height = c(rnorm(n = 100000, mean = 50, sd = 12)))
+ggplot(large_SD_hist) + geom_histogram(aes(x = Height), fill = "#b3cde3", col = "black", bins = 100) + theme_bw()+ labs(x = "", y = "Frequency") +
+  scale_x_continuous(breaks = seq(0, 100, 20), limits = c(0, 100))+
+  theme(plot.title = element_text(hjust = 0.5, size = 16),text = element_text(size = 16),
+        axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
 
 
 ```
@@ -100,6 +117,13 @@ hist(c(0, 101, rnorm(n = 100000, mean = 50, sd = 4)), nclass = 101, ylab = "Freq
 axis(side = 1,  at=seq(0 , 100, 20), labels = seq(0 , 100, 20))
 
 
+small_SD_hist <- data.frame(Height = c(rnorm(n = 100000, mean = 50, sd = 4)))
+ggplot(small_SD_hist) + geom_histogram(aes(x = Height), fill = "#b3cde3", col = "black", bins = 100) + theme_bw()+ labs(x = "", y = "Frequency") +
+  scale_x_continuous(breaks = seq(0, 100, 20), limits = c(0, 100))+
+  theme(plot.title = element_text(hjust = 0.5, size = 16),text = element_text(size = 16),
+        axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
+
+
 
 ```
 
@@ -110,6 +134,12 @@ axis(side = 1,  at=seq(0 , 100, 20), labels = seq(0 , 100, 20))
 ```{r, Q5, echo=show_solutions, eval=run_chunks, warning=FALSE}
 
 barplot(table(rpois(n = 100000, lambda = 4)), axes = F, ylab = "Number of patients in an hour")
+
+
+poisson_hist <- data.frame(Height = c(rpois(n = 100000, lambda = 4)))
+ggplot(poisson_hist) + geom_bar(aes(x = Height), fill = "#b3cde3", col = "black") + theme_bw()+ labs(x = "", y = "Frequency") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16),text = element_text(size = 16),
+        axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
 
 
 ```
@@ -124,6 +154,8 @@ http://www.who.int/healthinfo/survey/countries/en/
 So I took a reference (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2396974/) from the paper you gave (https://www.sciencedirect.com/science/article/pii/S074937970900097X), detailing the average consumption of men and women who consume 5 or more fruit/veg a day, which is the same definition as used in the World Health Survey. In the paper you linked, they warn against comparing between studies, but I'm assuming it's ok for the purposes of these plots. Let me know if you would like me to use two countries in the same study. Let me know if you would like me to break it down by age as well (which would require more digging for the original data).
 
 Note: the Worth Health Survey paper do not give % of respondants who eat "Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7", like they do in the England study. From the Word document you provided, I'm guessing this was what you were looking for, as you were hoping to compare these distributions with the Normal/Poisson the students learnt previously. I can go digging for the data to see if they have % by portion of fruit/veg, if the following plots are not what you are looking for.
+
+Note also I used a y-axis going from 0 - 70% consistently for US, Pakistan and Ghana in order to show differences in magnitude (which is why the Pakistan graph looks so weird)
 
 US data
 From Blanck et al. 2008 (Table 2):
@@ -227,12 +259,12 @@ https://jech.bmj.com/content/68/9/856 (Table 1)
 
 
 
-fruit_veg_df <- data.frame(portions = c("Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7"),
+fruit_veg_df <- data.frame(portions = c("< 1", "1 - 3", "3 - 5", "5 - 7", "7+"),
                           percent = c(15.2, 30.9, 29.0, 15.7, 9.3))
 
-fruit_veg_df$portions <- factor(fruit_veg_df$portions, levels = c("Less than 1", "1 to 3", "3 to 5", "5 to 7", "More than 7"))
+fruit_veg_df$portions <- factor(fruit_veg_df$portions, levels = c("< 1", "1 - 3", "3 - 5", "5 - 7", "7+"))
 
-ggplot(fruit_veg_df) + geom_bar(aes(x = portions, y = percent), stat =  "identity", fill = "#a6cee3", colour = "black", size = 0.8, width = 0.8) + theme_bw()+
+ggplot(fruit_veg_df) + geom_bar(aes(x = portions, y = percent), stat =  "identity", fill = "#a6cee3", colour = "black", size = 0.5, width = 0.8) + theme_bw()+
   labs(x = "\ Portions", y = "Percent of respondants (%)") + ggtitle("Portions of fruit and vegetables \n eaten on previous day in England") +
   theme(plot.title = element_text(hjust = 0.5, size = 16), text = element_text(size = 16), axis.text.x = element_text(colour = "black"), axis.text.y = element_text(colour = "black"))
 
@@ -243,9 +275,14 @@ ggplot(fruit_veg_df) + geom_bar(aes(x = portions, y = percent), stat =  "identit
 ```{r, Q8, echo=show_solutions, eval=run_chunks, warning=FALSE}
 
 
-hist(c(10, 42, rnorm(n = 100000, mean = 26, sd = 2)), nclass = 101, ylab = "Frequency", xlab = "BMI", main = "", axes = F)
-axis(side = 1,  at=seq(10 , 42, 4), labels = seq(10 , 42, 4))
+hist(c(rnorm(n = 100000, mean = 26, sd = 1)), nclass = 101, ylab = "Frequency", xlab = "BMI", main = "", axes = F)
+axis(side = 1,  at=seq(22, 30, 4), labels = seq(22 , 30, 4))
 
+normal_mean_26 <- data.frame(Height = c(rnorm(n = 100000, mean = 26, sd = 1)))
+ggplot(normal_mean_26) + geom_histogram(aes(x = Height), fill = "#b3cde3", col = "black", bins = 100) + theme_bw()+ labs(x = "BMI", y = "Frequency") +
+  scale_x_continuous(breaks = seq(22, 30, 1), limits = c(22, 30))+
+  theme(plot.title = element_text(hjust = 0.5, size = 16),text = element_text(size = 16),
+        axis.text.x = element_text(colour = "black"), axis.ticks.y=element_blank(), axis.text.y = element_blank())
 
 
 ```
